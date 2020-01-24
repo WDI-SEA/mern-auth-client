@@ -30,7 +30,7 @@ const Signup = props => {
     }
 
     // Send the user sign up data to the server
-    fetch('http://localhost:3000/auth/signup', {
+    fetch(`${process.env.REACT_APP_SERVER_URL}/auth/signup`, {
       method: 'POST',
       body: JSON.stringify(data),
       headers: {
