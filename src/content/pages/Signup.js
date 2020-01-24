@@ -1,5 +1,6 @@
 // Packages
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Redirect } from 'react-router-dom'
 
 const Signup = props => {
   // Declare and initialize state variables
@@ -10,9 +11,52 @@ const Signup = props => {
   let [password, setPassword] = useState('')
   let [profileUrl, setProfileUrl] = useState('')
 
+  // Set message to blank if I'm typing in the form
+  useEffect(() => {
+    setMessage('')
+  }, [firstname, lastname, email, password, profileUrl])
+
   const handleSubmit = e => {
+    // Prevent default of form submission
     e.preventDefault()
-    // TODO: Send the user sign up data to the server
+
+    // Form the data object
+    let data = {
+      email,
+      firstname, 
+      lastname,
+      password,
+      profileUrl
+    }
+
+    // Send the user sign up data to the server
+    fetch('http://localhost:3000/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      response.json().then(result => {
+        if (response.ok) {
+          // I have a token - update the user info
+          props.updateUser(result.token)
+        }
+        else {
+          // Status was something other than 200
+          setMessage(`${response.status} ${response.statusText}: ${result.message}`)
+        }
+      })
+    })
+    .catch(err => {
+      setMessage(`Error: ${err.toString()}`)
+    })
+  }
+
+  // Redirect if there is already someone logged in
+  if (props.user) {
+    return <Redirect to="/profile" />
   }
 
   return (
